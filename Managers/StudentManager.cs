@@ -1,46 +1,60 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using AutoMapper;
 using Interfaces.IManager;
 using Interfaces.IRepository;
-using Models;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using Microsoft.AspNetCore.JsonPatch;
+using Student = DataAccess.Entities.Student;
+using StudentDto = Models.DTOs.Student;
+
 namespace Managers
 {
-     public class StudentManager: IStudentManager
+    public class StudentManager : IStudentManager
     {
-        private readonly IStudentRepository<Student> _repo;
-
-        public StudentManager(IStudentRepository<Student> repo)
+        private readonly IBaseRepository<Student> _repo;
+        private readonly IMapper _mapper;
+        public StudentManager(IBaseRepository<Student> repo, IMapper mapper)
         {
             _repo = repo;
+            _mapper = mapper;
         }
-        public async Task<IEnumerable<Student>> GetAllAsync(string? search = null)
+        public async Task<IEnumerable<StudentDto>> GetAllAsync()
         {
+
             var data = await _repo.GetAllAsync();
-            if (string.IsNullOrEmpty(search))
-            {
-                data = data.Where(p => ((dynamic)p).Name.Contains(search));
-            }
-            return data;
+
+            return _mapper.Map<IEnumerable<StudentDto>>(data);
         }
-        public async Task<Student> GetByIdAsync(int id)=> await _repo.GetByIdAsync(id);
-        public async Task AddAsync(Student student)
+        public async Task<StudentDto> GetByIdAsync(int id)
         {
-            //if(typeof(T).Name=="Student")
-            //{
-            //    var student = (dynamic)entity;
-            //    if(string.IsNullOrEmpty(student.Name))
-            //    {
-            //        throw new System.Exception("Product name is required.");
-            //    }
-            //}
-           await  _repo.AddAsync(student);
+            var student = await _repo.GetByIdAsync(id);
+            return _mapper.Map<StudentDto>(student);
+        }
+        public async Task AddAsync(StudentDto studentDto)
+        {
+
+            var student = _mapper.Map<Student>(studentDto);
+            if (string.IsNullOrEmpty(student.Name))
+            {
+                throw new System.Exception("Product name is required.");
+            }
+
+            await _repo.AddAsync(student);
         }
 
-        public Task UpdateAsync(Student student) => _repo.UpdateAsync(student);
+        public async Task UpdateAsync(StudentDto studentDto)
+        {
+            var student = _mapper.Map<Student>(studentDto);
+            _mapper.Map(studentDto, student);
+            await _repo.UpdateAsync(student);
+        }
+        public async Task PatchAsync(int id, JsonPatchDocument<StudentDto> patchDoc)
+        {
+            var exist = await _repo.GetByIdAsync(id);
+            if (exist == null) throw new KeyNotFoundException("student not found");
+            var studentDto = _mapper.Map<StudentDto>(exist);
+            patchDoc.ApplyTo(studentDto);
+            _mapper.Map(studentDto, exist);
+            await _repo.UpdateAsync(exist);
+        }
         public Task DeleteAsync(int id) => _repo.DeleteAsync(id);
 
     }

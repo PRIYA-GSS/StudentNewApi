@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using Microsoft.AspNetCore.JsonPatch;
 namespace Interfaces.IRepository
 {
-    public interface IStudentRepository<T> where T:class
+    public interface IBaseRepository<T> where T:class
     {
         Task<IEnumerable<T>> GetAllAsync();
         Task<T> GetByIdAsync(int id);
@@ -14,6 +14,6 @@ namespace Interfaces.IRepository
         Task UpdateAsync(T entity);
         Task DeleteAsync(int id);
 
-
+        //Task PatchAsync(int id, JsonPatchDocument<T> patchDoc);
     }
 }

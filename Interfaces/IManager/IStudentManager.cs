@@ -1,19 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Models;
+﻿using StudentDto = Models.DTOs.Student;
+using Microsoft.AspNetCore.JsonPatch;
 namespace Interfaces.IManager
 {
     public interface IStudentManager
     {
-        Task<IEnumerable<Student>> GetAllAsync(string? search=null);
-        Task<Student> GetByIdAsync(int id);
+        Task<IEnumerable<StudentDto>> GetAllAsync();
+        Task<StudentDto> GetByIdAsync(int id);
 
-        Task AddAsync(Student student);
-        Task UpdateAsync(Student student);
+        Task AddAsync(StudentDto studentDto);
+        Task UpdateAsync(StudentDto studentDto);
         Task DeleteAsync(int id);
+        Task PatchAsync(int id, JsonPatchDocument<StudentDto> patchDoc);
 
 
     }

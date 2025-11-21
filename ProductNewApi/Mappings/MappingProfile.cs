@@ -1,8 +1,8 @@
 ﻿
 
 using AutoMapper;
-using Models;
-using StudentNewApi.DTOs;
+using Student = DataAccess.Entities.Student;
+using StudentDto = Models.DTOs.Student;
 
 namespace StudentNewApi.Mappings
 {

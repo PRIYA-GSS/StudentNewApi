@@ -3,16 +3,20 @@ using DataAccess.Repositories;
 using Interfaces.IManager;
 using Interfaces.IRepository;
 using Interfaces.IService;
-using Microsoft.EntityFrameworkCore;
-using Models;
 using Managers;
+using Microsoft.EntityFrameworkCore;
 using Services;
+using StudentNewApi.Mappings;
 
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add controllers
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddNewtonsoftJson(options =>
+    {
+        options.SerializerSettings.ContractResolver = new Newtonsoft.Json.Serialization.DefaultContractResolver();
+    });
 
 // Enable Swagger
 builder.Services.AddEndpointsApiExplorer();
@@ -23,12 +27,12 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Register AutoMapper
-builder.Services.AddAutoMapper(typeof(Program));
+builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 // Register Generic DI
-builder.Services.AddScoped(typeof(IStudentRepository<>), typeof(StudentRepository<>));
-builder.Services.AddScoped(typeof(IStudentManager<>), typeof(StudentManager<>));
-builder.Services.AddScoped(typeof(IStudentService<>), typeof(StudentService<>));
+builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
+builder.Services.AddScoped(typeof(IStudentManager), typeof(StudentManager));
+builder.Services.AddScoped(typeof(IStudentService), typeof(StudentService));
 
 // Build app
 var app = builder.Build();
